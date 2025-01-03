@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: viberr_backend
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: viberr_db
+jwt:
+  secret: "${SECRET_KEY}"
+  expiration: 7200000
