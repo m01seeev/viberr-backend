@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.viberrbackend.Auth.RegisterRequest;
 
 import java.util.List;
 
@@ -19,9 +20,13 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public UserModel addUser(UserModel user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public void registerUser(RegisterRequest registerRequest) {
+        UserModel user = new UserModel();
+        user.setUsername(registerRequest.getUsername());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setEmail(registerRequest.getEmail());
+        user.setRole("USER");
+        userRepository.save(user);
     }
 
     @Override

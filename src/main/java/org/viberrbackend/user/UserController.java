@@ -17,10 +17,4 @@ public class UserController {
         List<UserModel> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
-
-    @PostMapping
-    public ResponseEntity<UserModel> addUser(@RequestBody UserModel user) {
-        UserModel savedUser = userService.addUser(user);
-        return ResponseEntity.ok(savedUser);
-    }
 }

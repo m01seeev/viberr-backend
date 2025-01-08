@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.viberrbackend.Jwt.JwtUtil;
 import org.viberrbackend.User.UserModel;
 import org.viberrbackend.User.UserRepository;
+import org.viberrbackend.User.UserService;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -22,6 +24,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
@@ -34,7 +37,15 @@ public class AuthController {
             String token = jwtUtil.generateToken(username);
             return ResponseEntity.ok(new TokenResponse(token));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Неверный логин или пароль"));
         }
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@RequestBody RegisterRequest registerRequest) {
+        userService.registerUser(registerRequest);
+        return ResponseEntity.ok("Пользователь зарегистрирован");
     }
 }
