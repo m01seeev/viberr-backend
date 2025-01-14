@@ -15,6 +15,7 @@ import org.viberrbackend.User.UserRepository;
 import org.viberrbackend.User.UserService;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -27,15 +28,22 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> signIn(@RequestBody AuthRequest authRequest) {
         try {
-            Optional<UserModel> userOpt = userRepository.findByEmail(authRequest.getUsernameOrEmail());
+            Optional<UserModel> userOpt = userRepository.findByUsernameOrEmail(authRequest.getUsernameOrEmail(), authRequest.getUsernameOrEmail());
             String username = userOpt.map(UserModel::getUsername).orElse(authRequest.getUsernameOrEmail());
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, authRequest.getPassword())
             );
+            UserModel user = userOpt.orElseThrow(() -> new Exception("User not found"));
+            if (Objects.equals(user.getIsDeleted(), "YES")) {
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Вы заблокированы"));
+            }
             String token = jwtUtil.generateToken(username);
-            return ResponseEntity.ok(new TokenResponse(token));
+            String userId = user.getId();
+            return ResponseEntity.ok(new TokenResponse(token, userId, user.getRole()));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
@@ -44,7 +52,8 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> signUp(@RequestBody RegisterRequest registerRequest) {
+        userService.checkIfUserExists(registerRequest.getEmail(), registerRequest.getUsername());
         userService.registerUser(registerRequest);
         return ResponseEntity.ok("Пользователь зарегистрирован");
     }

@@ -20,8 +20,9 @@ public class UserModel implements UserDetails {
     private String email;
     private String password;
     private String role;
-    private String profileId;
     private List<String> contactsIds;
+    private String isDeleted;
+
     @JsonIgnore
     @Transient
     private List<String> authorities;
